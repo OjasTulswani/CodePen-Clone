@@ -158,5 +158,3 @@ npm start
 
 This will start the development server and open the app in your default web browser.
 
-
-Feel free to customize this README as needed.
