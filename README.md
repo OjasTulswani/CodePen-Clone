@@ -1,70 +1,160 @@
-# Getting Started with Create React App
+# Codepen-Like React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is a simple Codepen-like application built using React, Codemirror, and react-codemirror2. The app allows users to write HTML, CSS, and JavaScript code and see the output in real-time.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- Three separate editors for HTML, CSS, and JavaScript.
+- Real-time output preview in an iFrame.
+- State management for the editor contents using React's useState hook.
 
-### `npm start`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Dependencies
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+The project uses the following dependencies:
 
-### `npm test`
+- `codemirror`
+- `react-codemirror2`
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+You can install them using:
 
-### `npm run build`
+```bash
+npm install codemirror react-codemirror2
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Project Structure
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+The project structure is as follows:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+src/
+  ├── components/
+  │   └── Editor.js
+  ├── App.js
+  ├── App.css
+  └── index.js
+```
 
-### `npm run eject`
+## Usage
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Editor Component
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The `Editor` component is responsible for rendering the individual code editors. It uses `codemirror` and `react-codemirror2` for the editor functionality.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```jsx
+// src/components/Editor.js
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+import React from 'react';
+import { Controlled as CodeMirror } from 'react-codemirror2';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/material.css';
+import 'codemirror/mode/xml/xml';
+import 'codemirror/mode/css/css';
+import 'codemirror/mode/javascript/javascript';
 
-## Learn More
+const Editor = ({ language, value, onChange }) => {
+  return (
+    <CodeMirror
+      value={value}
+      options={{
+        mode: language,
+        theme: 'material',
+        lineNumbers: true
+      }}
+      onBeforeChange={(editor, data, value) => {
+        onChange(value);
+      }}
+    />
+  );
+};
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+export default Editor;
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### App Component
 
-### Code Splitting
+The `App` component manages the state of the editor contents and renders the `Editor` components and the output iFrame.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```jsx
+// src/App.js
 
-### Analyzing the Bundle Size
+import React, { useState } from 'react';
+import Editor from './components/Editor';
+import './App.css';
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+function App() {
+  const [html, setHtml] = useState('');
+  const [css, setCss] = useState('');
+  const [js, setJs] = useState('');
 
-### Making a Progressive Web App
+  const srcDoc = `
+    <html>
+      <body>${html}</body>
+      <style>${css}</style>
+      <script>${js}</script>
+    </html>
+  `;
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+  return (
+    <div className="App">
+      <div className="pane top-pane">
+        <Editor language="xml" value={html} onChange={setHtml} />
+        <Editor language="css" value={css} onChange={setCss} />
+        <Editor language="javascript" value={js} onChange={setJs} />
+      </div>
+      <div className="pane">
+        <iframe
+          srcDoc={srcDoc}
+          title="output"
+          sandbox="allow-scripts"
+          frameBorder="0"
+          width="100%"
+          height="100%"
+        />
+      </div>
+    </div>
+  );
+}
 
-### Advanced Configuration
+export default App;
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### CSS
 
-### Deployment
+Add some basic styling in `App.css` to make the application look better:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```css
+/* src/App.css */
 
-### `npm run build` fails to minify
+.App {
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+}
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+.pane {
+  display: flex;
+  flex: 1;
+}
+
+.top-pane {
+  display: flex;
+  flex: 1;
+}
+
+.CodeMirror {
+  flex: 1;
+  height: 100%;
+}
+```
+
+## Running the App
+
+To run the app, use:
+
+```bash
+npm start
+```
+
+This will start the development server and open the app in your default web browser.
+
